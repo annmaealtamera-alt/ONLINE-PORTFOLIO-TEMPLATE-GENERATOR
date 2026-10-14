@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Portfolio — SEVENX STUDIO</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <a class="logo" href="index.html">SEVENX <span>STUDIO.</span></a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="create.html">Create Portfolio</a>
+    </nav>
+  </header>
+
+  <main class="create-page">
+    <p class="eyebrow">STEP 01 — YOUR INFORMATION</p>
+    <h1>Let's make it<br><span>personal.</span></h1>
+    <p class="intro">Tell us about yourself. You can review your details before choosing a design.</p>
+
+    <form id="portfolioForm" class="portfolio-form">
+      <label for="fullName">Full Name *</label>
+      <input id="fullName" name="fullName" placeholder="Your full name" required>
+
+      <label for="email">Email Address *</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+      <label for="about">About Me *</label>
+      <textarea id="about" name="about" placeholder="Tell us about yourself..." required></textarea>
+
+      <label for="skills">Skills</label>
+      <input id="skills" name="skills" placeholder="Design, coding, communication">
+
+      <label for="education">Educational Background</label>
+      <input id="education" name="education" placeholder="School, course, or degree">
+
+      <label for="projects">Projects</label>
+      <textarea id="projects" name="projects" placeholder="Tell us about your projects..."></textarea>
+
+      <button type="submit">CONTINUE TO TEMPLATES ↗</button>
+      <p id="formMessage" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <footer>
+    <span>SEVENX STUDIO.</span>
+    <a href="index.html">← BACK HOME</a>
+  </footer>
+
+  <script>
+    document.getElementById("portfolioForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const data = Object.fromEntries(new FormData(this).entries());
+      localStorage.setItem("sevenxPortfolio", JSON.stringify(data));
+
+      window.location.href = "templates.html";
+    });
+  </script>
+</body>
+</html>

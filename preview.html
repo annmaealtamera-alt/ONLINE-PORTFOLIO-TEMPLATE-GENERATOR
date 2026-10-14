@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Preview — SEVENX STUDIO</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .preview-page {
+      max-width: 1000px;
+      margin: auto;
+      padding: 60px 8%;
+    }
+
+    .portfolio-output {
+      margin-top: 35px;
+      padding: clamp(25px, 6vw, 65px);
+      background: #141414;
+      border: 1px solid #383838;
+      overflow-wrap: anywhere;
+    }
+
+    .portfolio-output h1 {
+      font-size: clamp(38px, 7vw, 76px);
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin: 20px 0;
+    }
+
+    .portfolio-output h2 {
+      color: #ff3434;
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-top: 35px;
+    }
+
+    .portfolio-output p {
+      color: #c0c0c0;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .portfolio-output[data-template="simple"] {
+      background: #111;
+      border-color: #777;
+      border-radius: 0;
+    }
+
+    .portfolio-output[data-template="modern"] {
+      background: linear-gradient(135deg, #251010, #101010 65%);
+      border-color: #ff3434;
+      border-radius: 16px;
+    }
+
+    .portfolio-output[data-template="creative"] {
+      background: #190909;
+      border: 2px dashed #ff3434;
+      border-radius: 0 40px 0 40px;
+    }
+
+    .preview-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .secondary-btn {
+      display: inline-block;
+      padding: 15px 20px;
+      margin-top: 22px;
+      border: 1px solid #555;
+      color: #f5f3ef;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .secondary-btn:hover {
+      border-color: #ff3434;
+      color: #ff3434;
+    }
+
+    @media print {
+      .navbar, footer, .eyebrow, .intro,
+      .preview-actions, .preview-actions * {
+        display: none !important;
+      }
+
+      body, .portfolio-output {
+        color: #111;
+        background: white !important;
+        border-color: #ddd !important;
+      }
+
+      .portfolio-output p { color: #333; }
+      .portfolio-output h2 { color: #b00000; }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <a class="logo" href="index.html">SEVENX <span>STUDIO.</span></a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="create.html">Edit Details</a>
+      <a href="templates.html">Templates</a>
+    </nav>
+  </header>
+
+  <main class="preview-page">
+    <p class="eyebrow">STEP 03 — THE REVEAL</p>
+    <h1>Your story.<br><span style="color:#ff3434">Your portfolio.</span></h1>
+    <p class="intro">Here's your portfolio preview. You can return to edit your details or print this page.</p>
+
+    <article class="portfolio-output" id="portfolioOutput">
+      <p class="eyebrow">PERSONAL PORTFOLIO</p>
+      <h1 id="outputName">Your Name</h1>
+      <p id="outputEmail"></p>
+
+      <h2>ABOUT ME</h2>
+      <p id="outputAbout"></p>
+
+      <h2>SKILLS</h2>
+      <p id="outputSkills"></p>
+
+      <h2>EDUCATION</h2>
+      <p id="outputEducation"></p>
+
+      <h2>PROJECTS</h2>
+      <p id="outputProjects"></p>
+    </article>
+
+    <div class="preview-actions">
+      <a class="secondary-btn" href="create.html">← EDIT DETAILS</a>
+      <a class="secondary-btn" href="templates.html">CHANGE TEMPLATE</a>
+      <button id="printButton" type="button">PRINT / SAVE AS PDF ↗</button>
+    </div>
+
+    <p id="previewMessage" aria-live="polite"></p>
+  </main>
+
+  <footer>
+    <span>SEVENX STUDIO.</span>
+    <span>YOUR WORK. YOUR STORY.</span>
+  </footer>
+
+  <script>
+    const savedPortfolio = JSON.parse(
+      localStorage.getItem("sevenxPortfolio") || "null"
+    );
+
+    if (savedPortfolio && savedPortfolio.fullName) {
+      document.getElementById("outputName").textContent =
+        savedPortfolio.fullName;
+      document.getElementById("outputEmail").textContent =
+        savedPortfolio.email || "";
+      document.getElementById("outputAbout").textContent =
+        savedPortfolio.about || "";
+      document.getElementById("outputSkills").textContent =
+        savedPortfolio.skills || "Not provided";
+      document.getElementById("outputEducation").textContent =
+        savedPortfolio.education || "Not provided";
+      document.getElementById("outputProjects").textContent =
+        savedPortfolio.projects || "Not provided";
+
+      document.getElementById("portfolioOutput").dataset.template =
+        savedPortfolio.template || "simple";
+    } else {
+      document.getElementById("previewMessage").textContent =
+        "No portfolio information found. Please create your portfolio first.";
+    }
+
+    document.getElementById("printButton").addEventListener("click", () => {
+      window.print();
+    });
+  </script>
+</body>
+</html>
