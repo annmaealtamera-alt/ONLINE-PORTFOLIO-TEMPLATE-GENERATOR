@@ -12,6 +12,7 @@ body{margin:0;background:var(--bg);color:#f6f7f9;font:15px Arial,sans-serif;line
 header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#080b0fee;z-index:5}
 .logo{font-weight:900;font-size:21px}.logo span,h1 span,h2 span{color:var(--red)}
 nav,.actions{display:flex;gap:10px;flex-wrap:wrap}
+.preview-active header nav{display:none}
 button{background:var(--red);color:white;border:0;border-radius:7px;padding:11px 16px;cursor:pointer;font-weight:bold}
 button:hover{opacity:.85}
 .secondary{background:transparent;border:1px solid var(--line)}
@@ -29,6 +30,7 @@ textarea{min-height:90px;resize:vertical}
 label{font-weight:bold;font-size:13px}
 small{color:var(--muted)}
 .templates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.templates + .actions{margin-top:20px}
 .template{border:1px solid var(--line);padding:18px;border-radius:12px;background:var(--panel);cursor:pointer}
 .template.selected{border:2px solid var(--red)}
 .sample{height:120px;border-radius:8px;padding:15px;background:#f6f4ef;color:#20242b}
@@ -36,6 +38,7 @@ small{color:var(--muted)}
 .sample.creative{background:#ffe3dc;color:#39242d;border-radius:28px 4px}
 .template input{width:auto}
 #portfolioOutput{background:#f7f7f7;color:#20242b;border-radius:12px;padding:28px;overflow-wrap:anywhere}
+#portfolioOutput + .actions.noPrint{margin-top:20px}
 .portfolioLayout{display:grid;grid-template-columns:minmax(180px,1fr) 2fr;gap:25px}
 .portfolioLayout section{margin-bottom:16px}
 .profile{width:120px;height:120px;object-fit:cover;border-radius:50%;border:3px solid var(--red)}
@@ -191,14 +194,13 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
 <header>
   <div class="logo"><span>SEVENX</span> STUDIO.</div>
   <nav>
+    <button class="secondary" onclick="goBack()">← Back</button>
     <button class="secondary" onclick="showPage('home')">Home</button>
-    <button class="secondary" onclick="newPortfolio()">Create Portfolio</button>
-    <button class="secondary" onclick="showPage('manage');loadPortfolios()">Manage Portfolio</button>
   </nav>
 </header>
 
 <main>
-<section id="home" class="page active">
+<section id="home" class="page">
   <div class="hero">
     <p>YOUR STORY. YOUR DESIGN.</p>
     <h1>Build Your <span>Professional Portfolio</span> in Minutes.</h1>
@@ -215,11 +217,25 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
   </div>
 </section>
 
+<section id="loginPage" class="page active">
+  <p>WELCOME BACK</p><h2>Sign in to <span>SEVENX STUDIO.</span></h2>
+  <p>Demo sign-in: enter any valid email and password to continue.</p>
+  <div class="panel" style="max-width:480px">
+    <form id="loginForm">
+      <div class="field full"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+      <div class="field full"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Your password"></div>
+      <div class="actions full">
+        <button type="submit">Sign In</button>
+      </div>
+    </form>
+  </div>
+</section>
+
 <section id="formPage" class="page">
   <p>STEP 1 OF 3</p><h2>Portfolio <span>Information</span></h2>
   <p>Complete your details. Fields marked * are required.</p>
   <form id="portfolioForm">
-    <div class="field"><label for="full_name">Full Name *</label><input id="full_name" required maxlength="100" placeholder="Your full name"></div>
+    <div class="field"><label for="full_name">Full Name *</label><input id="full_name" required maxlength="100" pattern="[^0-9]*" title="Numbers are not allowed in a name." placeholder="Your full name"></div>
     <div class="field"><label for="job_title">Professional Title</label><input id="job_title" placeholder="e.g. Aspiring Web Developer"></div>
     <div class="field"><label for="profile_picture">Profile Picture</label><input id="profile_picture" type="file" accept="image/png,image/jpeg,image/webp"><small>Image maximum: 2 MB.</small></div>
     <div class="field"><label for="email">Email *</label><input id="email" type="email" required placeholder="you@example.com"></div>
@@ -272,10 +288,10 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
   <div class="noPrint"><p>STEP 3 OF 3</p><h2>Portfolio <span>Preview</span></h2><p>Review your portfolio before printing or saving as PDF.</p></div>
   <div id="portfolioOutput"></div>
   <div class="actions noPrint">
-    <button onclick="window.print()">Print / Save as PDF</button>
+    <button class="secondary" onclick="window.print()">Print / Save as PDF</button>
     <button class="secondary" onclick="openEditInformation()">Edit Information</button>
     <button class="secondary" onclick="showPage('templatesPage')">Change Template</button>
-    <button onclick="savePortfolio()">Save Portfolio</button>
+    <button class="secondary" onclick="savePortfolio()">Save Portfolio</button>
     <button class="secondary" onclick="showPage('manage');loadPortfolios()">Manage Portfolios</button>
   </div>
   <p id="saveStatus" role="status"></p>
@@ -287,6 +303,7 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
   <div class="actions">
     <button onclick="newPortfolio()">+ Create New Portfolio</button>
     <button class="secondary" onclick="loadPortfolios()">Refresh List</button>
+    <button class="secondary" onclick="showPage('home')">← Back to Home</button>
   </div>
   <div class="panel" style="overflow-x:auto;margin-top:20px">
     <table>
@@ -309,12 +326,26 @@ const fields = [
 
 let current = {};
 let editingId = null;
+let pageHistory = [];
+let currentPage = document.querySelector('.page.active')?.id || 'loginPage';
 
-function showPage(id) {
+function showPage(id, trackHistory = true) {
+  if (trackHistory && id !== currentPage) pageHistory.push(currentPage);
+  currentPage = id;
+  document.body.classList.toggle('preview-active', id === 'previewPage');
   document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 }
+
+function goBack() {
+  showPage(pageHistory.pop() || 'home', false);
+}
+
+document.getElementById('loginForm').addEventListener('submit', event => {
+  event.preventDefault();
+  showPage('home');
+});
 
 function newPortfolio() {
   editingId = null;
