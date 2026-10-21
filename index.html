@@ -12,7 +12,7 @@ body{margin:0;background:var(--bg);color:#f6f7f9;font:15px Arial,sans-serif;line
 header{padding:18px 6%;display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#080b0fee;z-index:5}
 .logo{font-weight:900;font-size:21px}.logo span,h1 span,h2 span{color:var(--red)}
 nav,.actions{display:flex;gap:10px;flex-wrap:wrap}
-.preview-active header nav{display:none}
+#previewActions[hidden]{display:none!important}
 button{background:var(--red);color:white;border:0;border-radius:7px;padding:11px 16px;cursor:pointer;font-weight:bold}
 button:hover{opacity:.85}
 .secondary{background:transparent;border:1px solid var(--line)}
@@ -61,7 +61,7 @@ small{color:var(--muted)}
 .creative a{color:#a53e54}
 table{width:100%;border-collapse:collapse}
 th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
-footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var(--muted)}
+footer{text-align:center;margin-top:72px;padding:8px;font-size:11px;border-top:1px solid var(--line);color:var(--muted)}
 #status,#saveStatus,#manageStatus{color:#ff8995}
 @media(max-width:700px){
  header{align-items:flex-start;flex-direction:column}
@@ -194,8 +194,7 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
 <header>
   <div class="logo"><span>SEVENX</span> STUDIO.</div>
   <nav>
-    <button class="secondary" onclick="goBack()">← Back</button>
-    <button class="secondary" onclick="showPage('home')">Home</button>
+    <button id="backButton" class="secondary" onclick="goBack()" hidden>← Back</button>
   </nav>
 </header>
 
@@ -232,14 +231,14 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
 </section>
 
 <section id="formPage" class="page">
-  <p>STEP 1 OF 3</p><h2>Portfolio <span>Information</span></h2>
+  <p>STEP 1 OF 3</p><h2 id="formHeading">Your <span>Information</span></h2>
   <p>Complete your details. Fields marked * are required.</p>
   <form id="portfolioForm">
     <div class="field"><label for="full_name">Full Name *</label><input id="full_name" required maxlength="100" pattern="[^0-9]*" title="Numbers are not allowed in a name." placeholder="Your full name"></div>
     <div class="field"><label for="job_title">Professional Title</label><input id="job_title" placeholder="e.g. Aspiring Web Developer"></div>
     <div class="field"><label for="profile_picture">Profile Picture</label><input id="profile_picture" type="file" accept="image/png,image/jpeg,image/webp"><small>Image maximum: 2 MB.</small></div>
     <div class="field"><label for="email">Email *</label><input id="email" type="email" required placeholder="you@example.com"></div>
-    <div class="field"><label for="contact">Contact Number</label><input id="contact" type="tel" placeholder="Contact number"></div>
+    <div class="field"><label for="contact">Contact Number</label><input id="contact" type="tel" pattern="[0-9]*" title="Only numbers are allowed in a contact number." placeholder="Contact number"><small>Numbers only. Letters or symbols will prevent continuing.</small></div>
     <div class="field"><label for="address">Address</label><input id="address" placeholder="City / Province"></div>
     <div class="field full"><label for="about">About Me</label><textarea id="about" placeholder="Introduce yourself, interests, and goals."></textarea></div>
     <div class="field full"><label for="education">Educational Background</label><textarea id="education" placeholder="School, course, year level, graduation year"></textarea></div>
@@ -279,15 +278,14 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
     </label>
   </div>
   <div class="actions">
-    <button class="secondary" onclick="showPage('formPage')">← Back</button>
     <button onclick="generatePreview()">Generate Portfolio →</button>
   </div>
 </section>
 
 <section id="previewPage" class="page">
-  <div class="noPrint"><p>STEP 3 OF 3</p><h2>Portfolio <span>Preview</span></h2><p>Review your portfolio before printing or saving as PDF.</p></div>
+  <div class="noPrint"><p id="previewStepLabel">STEP 3 OF 3</p><h2 id="previewHeading">Portfolio <span>Preview</span></h2><p id="previewDescription">Review your portfolio.</p></div>
   <div id="portfolioOutput"></div>
-  <div class="actions noPrint">
+  <div id="previewActions" class="actions noPrint">
     <button class="secondary" onclick="window.print()">Print / Save as PDF</button>
     <button class="secondary" onclick="openEditInformation()">Edit Information</button>
     <button class="secondary" onclick="showPage('templatesPage')">Change Template</button>
@@ -303,7 +301,6 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
   <div class="actions">
     <button onclick="newPortfolio()">+ Create New Portfolio</button>
     <button class="secondary" onclick="loadPortfolios()">Refresh List</button>
-    <button class="secondary" onclick="showPage('home')">← Back to Home</button>
   </div>
   <div class="panel" style="overflow-x:auto;margin-top:20px">
     <table>
@@ -312,7 +309,6 @@ footer{text-align:center;padding:24px;border-top:1px solid var(--line);color:var
     </table>
   </div>
   <p id="manageStatus" role="status"></p>
-  <p class="muted">Prototype note: this version stores portfolios in this browser. A cloud database is still needed for online storage and sharing across devices.</p>
 </section>
 </main>
 <footer>© 2026 SEVENX STUDIO. | Build Your Story.</footer>
@@ -330,8 +326,26 @@ let pageHistory = [];
 let currentPage = document.querySelector('.page.active')?.id || 'loginPage';
 
 function showPage(id, trackHistory = true) {
+  const previousPage = currentPage;
   if (trackHistory && id !== currentPage) pageHistory.push(currentPage);
   currentPage = id;
+  if (id === 'previewPage' && previousPage === 'manage' && !trackHistory) {
+    const previewActions = document.getElementById('previewActions');
+    previewActions.hidden = false;
+    previewActions.style.display = '';
+  }
+  const backButton = document.getElementById('backButton');
+  backButton.hidden = id !== 'formPage' && id !== 'templatesPage' && id !== 'previewPage' && id !== 'manage';
+  const backTarget = pageHistory[pageHistory.length - 1] || 'home';
+  const pageLabels = {
+    home: 'Home',
+    loginPage: 'Sign In',
+    formPage: 'Step 1',
+    templatesPage: 'Step 2',
+    previewPage: 'Preview',
+    manage: 'Manage'
+  };
+  backButton.textContent = `← Back to ${pageLabels[backTarget] || 'Previous Page'}`;
   document.body.classList.toggle('preview-active', id === 'previewPage');
   document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -350,6 +364,7 @@ document.getElementById('loginForm').addEventListener('submit', event => {
 function newPortfolio() {
   editingId = null;
   current = {};
+  document.getElementById('formHeading').innerHTML = 'Your <span>Information</span>';
   document.getElementById('portfolioForm').reset();
   document.getElementById('profile_picture').value = '';
   document.getElementById('status').textContent = '';
@@ -369,6 +384,7 @@ function newPortfolio() {
 
 function openEditInformation() {
   const form = document.getElementById('portfolioForm');
+  document.getElementById('formHeading').innerHTML = 'Edit <span>Information</span>';
 
   // Ibalik ang current information sa form
   fields.forEach(fieldId => {
@@ -470,7 +486,7 @@ function lineText(value = '') {
   return escapeHTML(value).replace(/\n/g, '<br>');
 }
 
-function generatePreview() {
+function generatePreview(isViewingTemplate = false) {
   const chosen = document.querySelector('input[name="template"]:checked');
   if (!chosen) {
     alert('Please select a template first.');
@@ -478,6 +494,14 @@ function generatePreview() {
   }
 
   current.template = chosen.value;
+  document.getElementById('previewStepLabel').hidden = isViewingTemplate;
+  document.getElementById('previewDescription').hidden = isViewingTemplate;
+  const previewActions = document.getElementById('previewActions');
+  previewActions.hidden = isViewingTemplate;
+  previewActions.style.display = isViewingTemplate ? 'none' : '';
+  document.getElementById('previewHeading').innerHTML = isViewingTemplate
+    ? 'View <span>Portfolio</span>'
+    : 'Portfolio <span>Preview</span>';
   const d = current;
   const out = document.getElementById('portfolioOutput');
   out.className = d.template;
@@ -1004,19 +1028,17 @@ console.log('FULL NAME FROM DATABASE:', portfolio.full_name);
         if (radio) radio.checked = true;
 
         updateTemplateCards();
-        generatePreview();
+        generatePreview(true);
       };
 
       const editButton = document.createElement('button');
       editButton.textContent = 'Edit';
-      editButton.className = 'secondary';
       editButton.style.margin = '5px';
       editButton.onclick = async () => {
   await editPortfolio(portfolio.id);
 };
       const deleteButton = document.createElement('button');
       deleteButton.textContent = 'Delete';
-      deleteButton.className = 'secondary';
       deleteButton.onclick = () => deletePortfolio(portfolio.id);
 
       actionsCell.append(viewButton, editButton, deleteButton);
@@ -1097,6 +1119,7 @@ async function editPortfolio(id) {
     if (radio) radio.checked = true;
 
     updateTemplateCards();
+    document.getElementById('formHeading').innerHTML = 'Edit <span>Information</span>';
     showPage('formPage');
 
     status.textContent = 'Portfolio loaded for editing.';
